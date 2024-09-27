@@ -7,4 +7,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\sudan\OneDrive\Документы\ИСРПО\Maze\Maze\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\sudan\OneDrive\Документы\ИСРПО\Maze\Maze\.editorconfig" />
+  </ItemGroup>
+
 </Project>
