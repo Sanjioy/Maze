@@ -1,21 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 
 class Program
 {
+    ///<summary>Двумерный массив для представления лабиринта.</summary>
     static char[,] maze;
+
+    ///<summary>Координаты игрока по оси X.</summary>
     static int playerX, playerY;
+
+    ///<summary>Координаты выхода по оси X.</summary>
     static int exitX, exitY;
+
+    ///<summary>Объект для генерации случайных чисел.</summary>
     static Random random = new Random();
 
     static void Main()
     {
-        int size = 21; // Размер лабиринта (нечетное число)
+        ///<summary>Размер лабиринта (нечетное число).</summary>
+        int size = 21;
         InitializeMaze(size);
         GenerateMaze();
         PlacePlayerAndExit();
         PrintMaze();
 
+        ///<summary>Игровой цикл, ожидающий ввода от пользователя.</summary>
         while (true)
         {
             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
@@ -28,20 +36,22 @@ class Program
                 MovePlayer(keyInfo.Key);
             }
 
+            ///<summary>Проверка на достижение выхода.</summary>
             if (playerX == exitX && playerY == exitY)
             {
-                Console.SetCursorPosition(0, size); // Позиция под лабиринтом
+                Console.SetCursorPosition(0, size);
                 Console.WriteLine("Поздравляем! Вы вышли из лабиринта!");
                 break;
             }
         }
     }
 
+    ///<summary>Инициализация лабиринта, заполнение его стенами.</summary>
     static void InitializeMaze(int size)
     {
         maze = new char[size, size];
 
-        // Заполняем лабиринт стенами
+        ///<summary>Заполнение лабиринта стенами.</summary>
         for (int i = 0; i < size; i++)
         {
             for (int j = 0; j < size; j++)
@@ -51,6 +61,7 @@ class Program
         }
     }
 
+    ///<summary>Генерация лабиринта с помощью случайной прогулки.</summary>
     static void GenerateMaze()
     {
         int startX = 1, startY = 1;
@@ -58,11 +69,13 @@ class Program
         RandomWalk(startX, startY);
     }
 
+    ///<summary>Рекурсивный метод для реализации случайной прогулки.</summary>
     static void RandomWalk(int x, int y)
     {
         int[] dx = { 2, -2, 0, 0 };
         int[] dy = { 0, 0, 2, -2 };
 
+        ///<summary>Перемешивание направлений для случайного выбора движения.</summary>
         for (int i = 0; i < 4; i++)
         {
             int randIndex = random.Next(4);
@@ -75,6 +88,7 @@ class Program
             dy[randIndex] = temp;
         }
 
+        ///<summary>Проверка новых координат и обновление лабиринта.</summary>
         for (int i = 0; i < 4; i++)
         {
             int newX = x + dx[i];
@@ -89,11 +103,13 @@ class Program
         }
     }
 
+    ///<summary>Проверка, находится ли позиция в пределах лабиринта.</summary>
     static bool IsInBounds(int x, int y)
     {
         return x > 0 && x < maze.GetLength(0) && y > 0 && y < maze.GetLength(1);
     }
 
+    ///<summary>Размещение игрока и выхода в лабиринте.</summary>
     static void PlacePlayerAndExit()
     {
         playerX = 1;
@@ -102,9 +118,10 @@ class Program
 
         exitX = maze.GetLength(0) - 2;
         exitY = maze.GetLength(1) - 2;
-        maze[exitX, exitY] = 'E'; // Положение выхода
+        maze[exitX, exitY] = 'E';
     }
 
+    ///<summary>Вывод лабиринта на экран.</summary>
     static void PrintMaze()
     {
         Console.Clear();
@@ -118,6 +135,7 @@ class Program
         }
     }
 
+    ///<summary>Перемещение игрока в соответствии с нажатой клавишей.</summary>
     static void MovePlayer(ConsoleKey key)
     {
         int oldX = playerX;
@@ -125,22 +143,22 @@ class Program
 
         if (key == ConsoleKey.W && IsMoveValid(playerX - 1, playerY))
         {
-            playerX--; // Вверх
+            playerX--;
         }
         else if (key == ConsoleKey.S && IsMoveValid(playerX + 1, playerY))
         {
-            playerX++; // Вниз
+            playerX++;
         }
         else if (key == ConsoleKey.A && IsMoveValid(playerX, playerY - 1))
         {
-            playerY--; // Влево
+            playerY--;
         }
         else if (key == ConsoleKey.D && IsMoveValid(playerX, playerY + 1))
         {
-            playerY++; // Вправо
+            playerY++;
         }
 
-        // Обновляем только старую и новую позицию игрока
+        ///<summary>Обновление позиции игрока на экране.</summary>
         Console.SetCursorPosition(oldY, oldX);
         Console.Write(' ');
 
@@ -148,40 +166,41 @@ class Program
         Console.Write('P');
     }
 
+    ///<summary>Проверка допустимости движения игрока.</summary>
     static bool IsMoveValid(int x, int y)
     {
         return x >= 0 && x < maze.GetLength(0) && y >= 0 && y < maze.GetLength(1) && (maze[x, y] == ' ' || maze[x, y] == 'E');
     }
 
-    // Метод для поиска кратчайшего пути с помощью BFS
+    ///<summary>Метод для поиска кратчайшего пути с помощью алгоритма BFS.</summary>
     static void ShowShortestPath()
     {
         Queue<(int x, int y)> queue = new Queue<(int, int)>();
         bool[,] visited = new bool[maze.GetLength(0), maze.GetLength(1)];
-        (int x, int y)[,] prev = new (int x, int y)[maze.GetLength(0), maze.GetLength(1)]; // Массив для хранения предков
+        (int x, int y)[,] prev = new (int x, int y)[maze.GetLength(0), maze.GetLength(1)];
 
         queue.Enqueue((playerX, playerY));
         visited[playerX, playerY] = true;
 
         bool found = false;
 
-        // Векторы для смежных перемещений
+        ///<summary>Векторы для смежных перемещений.</summary>
         int[] dx = { 0, 0, 1, -1 };
         int[] dy = { 1, -1, 0, 0 };
 
-        // BFS
+        ///<summary>Алгоритм BFS для поиска кратчайшего пути.</summary>
         while (queue.Count > 0)
         {
             var (x, y) = queue.Dequeue();
 
-            // Если нашли выход
+            ///<summary>Проверка на достижение выхода.</summary>
             if (x == exitX && y == exitY)
             {
                 found = true;
                 break;
             }
 
-            // По всем возможным направлениям
+            ///<summary>Поиск всех возможных направлений.</summary>
             for (int i = 0; i < 4; i++)
             {
                 int newX = x + dx[i];
@@ -191,14 +210,14 @@ class Program
                 {
                     queue.Enqueue((newX, newY));
                     visited[newX, newY] = true;
-                    prev[newX, newY] = (x, y); // Запоминаем, откуда пришли
+                    prev[newX, newY] = (x, y);
                 }
             }
         }
 
+        ///<summary>Восстановление и вывод кратчайшего пути на экран.</summary>
         if (found)
         {
-            // Восстанавливаем путь
             var path = new List<(int x, int y)>();
             int cx = exitX, cy = exitY;
 
@@ -208,14 +227,14 @@ class Program
                 (cx, cy) = prev[cx, cy];
             }
 
-            // Выводим путь на экране
+            ///<summary>Отметка пути символом '*'.</summary>
             foreach (var (px, py) in path)
             {
                 Console.SetCursorPosition(py, px);
-                Console.Write('*'); // Отмечаем путь символом '*'
+                Console.Write('*');
             }
 
-            Console.SetCursorPosition(0, maze.GetLength(0)); // Перемещаем курсор в конец
+            Console.SetCursorPosition(0, maze.GetLength(0));
         }
     }
 }
